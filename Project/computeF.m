@@ -1,24 +1,24 @@
 % function F = computeF(A,T1,T2)
-% Compute and denormalize F 
-% Input: 
+% Compute and denormalize F
+% Input:
 %   -matrix A, normalization matrix T1 and T2
-% Output: 
+% Output:
 %   -Fundameantal matrix F
 function F = computeF(A,T1,T2)
 
     % Solution for Af=0 using SVD
-    [] = svd(A);
-    f = V(..);
-    F = ...
+    [~, ~, V] = svd(A);
+    f = V(:, end);
+    F = reshape(f, 3, 3);
 
     % Resolve the rank 2 constraint: det(F) =0 using SVD
-    [] = svd(F);
-    S(... ,... ) = 0;
-    F = ... 
+    [U2, S2, V2] = svd(F);
+    S(3, 3) = 0;
+    F = U2 * S2 * V2';
 
     % De-normalize F
     % F= T'_2 F T_1
-    F = ...
+    F = T2' * F * T1;
 
     % One more step: make sure that the norm of output_F is 1 (To deal with the scale invariance)
     F= F/norm(F);

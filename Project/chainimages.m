@@ -3,8 +3,8 @@
 %   consecutive frames. This matrix has tracked points as columns and
 %   views/frames as rows, and contains the indices of the descriptor for
 %   each frame. Therefore, if a certain descriptors can be seen in all
-%   frames, their columns are completely filled. Similarly, if it can be 
-%   matched only between frame 1 and 2, only the first 2 rows of the columns 
+%   frames, their columns are completely filled. Similarly, if it can be
+%   matched only between frame 1 and 2, only the first 2 rows of the columns
 %   will be non-zero.
 %
 % Inputs:
@@ -15,38 +15,31 @@
 % Outputs:
 % - PV: matrix containing matches between consecutive frames
 
-function [PV] = chainimages(matches)
-    tic;
-    % number of views
-    frames = size(matches,2);
-
+function [PV] = chainimages(frames, descs, forward_matches)
     % Initialize PV
     % We add an extra row to process the match between frame_last and frame_1.
     % This extra row will be deleted at the end.
-    PV = zeros(frames+1,0);
+    PV = zeros(length(frames)+1,0);
 
-    %  Starting from the first frame
-    for i=1:frames
-        newmatches = matches{i};
-        
-        % For the first pair, simply add the indices of matched points to the same
-        % column of the first two rows of the point-view matrix.
-        if i==1
-            PV(1:2,:) = ...
-        else
-            % Find already found points using intersection on PV(i,:) and newmatches 
-            [~, IA, IB]  = ... 
-            PV(i+1,... ) = intersection(...  , ...  )
-            
-            % Find new matching points that are not in the previous match set using setdiff.
-            [diff, IA] = setdiff(...  ,...  )
-            
-            % Grow the size of the point view matrix each time you find a new match.
-            start = size(PV,2)+1;
-            PV    = [PV zeros(frames+1, size(diff,2))]; 
-            PV(i, start:end)   = ...  
-            PV(i+1, start:end) = ...
-        end
+    % For the first pair, simply add the indices of matched points to the same
+    % column of the first two rows of the point-view matrix.
+    PV(1,:) = forward_matches{1};
+    PV(2,:) = forward_matches{2};
+    for i=3:frames
+        newmatches = forward_matches{i};
+
+        % Find already found points using intersection on PV(i,:) and newmatches
+        [~, IA, IB]  = intersect(newmatches(1,:), PV(i-1,:));
+        PV(i+1, IB) = intersection(...  , ...  )
+
+        % Find new matching points that are not in the previous match set using setdiff.
+        [diff, IA] = setdiff(...  ,...  )
+
+        % Grow the size of the point view matrix each time you find a new match.
+        start = size(PV,2)+1;
+        PV    = [PV zeros(frames+1, size(diff,2))];
+        PV(i, start:end)   = ...
+        PV(i+1, start:end) = ...
     end
 
     % Process the last frame-pair. This part is already completed by TAs.
@@ -57,7 +50,7 @@ function [PV] = chainimages(matches)
     PV(:, IA(2:end)) = PV(:, IA(2:end)) + PV(:, IB(2:end));  % skip 1st index (contains zeros)
     PV(:, IB(2:end)) = [];  % delete moved points in last frame
 
-    % Copy the non zero elements from the last row which are not in the first row to the first row. 
+    % Copy the non zero elements from the last row which are not in the first row to the first row.
     nonzero_last  = find(PV(end, :));
     nonzero_first = find(PV(1, :));
     no_member     = ~ismember(nonzero_last, nonzero_first);
@@ -70,8 +63,7 @@ function [PV] = chainimages(matches)
 
     % Copy extra row elements from last row to 1st row and delete the last row
     PV(1 ,1:size(tocopy, 2)) = PV(end, 1:size(tocopy, 2));
-    PV                       = PV(1:frames,:); 
-       
+    PV                       = PV(1:frames,:);
+
     disp(strcat(int2str(size(PV,2)), ' points in pointview matrix so far'));
-    toc;
 end
