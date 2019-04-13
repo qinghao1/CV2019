@@ -44,7 +44,7 @@ function [] = surfaceRender(pointcloud, M, Mean, img)
 
     % Grid to create surface on using meshgrid.
     % You can define the size of the grid (e.g., -500:500)
-    ti = -500:500;
+    ti = -700:700;
     [qx,qy] = meshgrid(ti, ti);
 
     % Surface generation using TriScatteredInterp
@@ -106,7 +106,7 @@ function [] = surfaceRender(pointcloud, M, Mean, img)
     surf(qx, qy, qz, qc);
 
     % Render parameters
-    axis( [-500 500 -500 500 -500 500] );
+    axis( [-700 700 -700 700 -700 700] );
     daspect([1 1 1]);
     rotate3d;
 

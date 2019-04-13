@@ -1,5 +1,6 @@
 % IN4393-16 Project
 % Chu Qinghao 4988612
+% Richard von Moos 4990242
 
 clc; clear;
 
@@ -7,15 +8,15 @@ clc; clear;
 run('../vlfeat-0.9.21/toolbox/vl_setup')
 
 % Constants
-PEAK_THRESH = 7; % SIFT peak threshold, default 0.
-MATCH_THRESH = 1.5; % SIFT matching threshold, default 1.5
+PEAK_THRESH = 4; % SIFT peak threshold, default 0.
+MATCH_THRESH = 1.8; % SIFT matching threshold, default 1.5
 RANSAC_ITERATIONS = 200;
-SAMPSON_THRESHOLD = 20; % Default 50
+SAMPSON_THRESHOLD = 10; % Default 50
 NUM_FRAMES = 3; % Chained points must be in >= NUM_FRAMES
 
 % Load images
-% imgs = load_images('TeddyBearPNG', 'PNG');
-% save('imgs', 'imgs')
+imgs = load_images('model_castle', 'jpg');
+save('imgs', 'imgs')
 load('imgs')
 
 % 1) Use vl_feat to find interest points and correspondences
@@ -36,8 +37,8 @@ load('sift_match')
 % 	hold on;
 % 	scatter(frames{i}(1,:), frames{i}(2,:), frames{i}(3,:), [1,1,0]);
 % 	scatter(size(imgs{i},2)+frames{j}(1,:), frames{j}(2,:), frames{j}(3,:), [1,1,0]);
-% 	match1 = frames{i}(:,matches(1,:));
-% 	match2 = frames{j}(:,matches(2,:));
+% 	match1 = frames{i}(:,forward_matches{i});
+% 	match2 = frames{j}(:,backward_matches{j});
 % 	line([match1(1,:);size(imgs{i},2)+match2(1,:)],[match1(2,:);match2(2,:)]);
 % end
 
@@ -66,5 +67,7 @@ PV = chainimages(best_forward_matches, best_backward_matches);
 save('PV', 'PV')
 load('PV')
 
-% 4) Create measurement matrix from PV matrix
+% 4,5,6) Create measurement matrix from PV matrix, use SFM to estimate
+% the 3d coordinates of each block and eliminating affine ambiguity,
+% stitch them together using procrustes,
 merged_cloud = reconstruction(PV, frames, NUM_FRAMES, imgs{1});
