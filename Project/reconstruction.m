@@ -1,4 +1,4 @@
-function [mergedCloud] = reconstruction(PV, frames, numFrames, imgs)
+function [mergedCloud] = reconstruction(PV, frames, numFrames, img)
     % Stitching: with affine Structure from Motion
     % Stitch every 3 images together to create a point cloud.
     Clouds = {};
@@ -117,6 +117,6 @@ function [mergedCloud] = reconstruction(PV, frames, numFrames, imgs)
     % the filled areas on the surface using the known points).
     % Students are supposed to implement this in a clever way (by using built-in
     % Matlab functions).
-    surfaceRender(mergedCloud, M1, MeanFrame1, imgs);
+    surfaceRender(mergedCloud, M1, MeanFrame1, img);
 
 end

@@ -7,7 +7,7 @@ clc; clear;
 run('../vlfeat-0.9.21/toolbox/vl_setup')
 
 % Constants
-PEAK_THRESH = 5; % SIFT peak threshold, default 0.
+PEAK_THRESH = 3; % SIFT peak threshold, default 0.
 MATCH_THRESH = 1.5; % SIFT matching threshold, default 1.5
 RANSAC_ITERATIONS = 100;
 SAMPSON_THRESHOLD = 25; % Default 50
@@ -19,11 +19,11 @@ NUM_FRAMES = 3; % Chained points must be in >= NUM_FRAMES
 load('imgs')
 
 % 1) Use vl_feat to find interest points and correspondences
-% [frames, descs] = sift_feat(imgs, PEAK_THRESH);
-% save('sift_feat', 'frames', 'descs')
+[frames, descs] = sift_feat(imgs, PEAK_THRESH);
+save('sift_feat', 'frames', 'descs')
 load('sift_feat')
-% [forward_matches, backward_matches] = sift_match(descs, MATCH_THRESH);
-% save('sift_match', 'forward_matches', 'backward_matches')
+[forward_matches, backward_matches] = sift_match(descs, MATCH_THRESH);
+save('sift_match', 'forward_matches', 'backward_matches')
 load('sift_match')
 
 % Plotting
@@ -42,8 +42,8 @@ load('sift_match')
 % end
 
 % 2) Apply normalized 8-point RANSAC to find best matches
-% [best_forward_matches, best_backward_matches] = ransac(frames, descs, forward_matches, backward_matches, RANSAC_ITERATIONS, SAMPSON_THRESHOLD);
-% save('ransac', 'best_forward_matches', 'best_backward_matches')
+[best_forward_matches, best_backward_matches] = ransac(frames, descs, forward_matches, backward_matches, RANSAC_ITERATIONS, SAMPSON_THRESHOLD);
+save('ransac', 'best_forward_matches', 'best_backward_matches')
 load('ransac')
 
 % Plotting
@@ -63,6 +63,8 @@ load('ransac')
 
 % 3) Create point-view matrix for point correspondences
 PV = chainimages(best_forward_matches, best_backward_matches);
+save('PV', 'PV')
+load('PV')
 
 % 4) Create measurement matrix from PV matrix
-merged_cloud = reconstruction(PV, frames, NUM_FRAMES, imgs);
+merged_cloud = reconstruction(PV, frames, NUM_FRAMES, imgs{1});
