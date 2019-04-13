@@ -7,10 +7,11 @@ clc; clear;
 run('../vlfeat-0.9.21/toolbox/vl_setup')
 
 % Constants
-PEAK_THRESH = 8; % SIFT peak threshold, default 0.
+PEAK_THRESH = 5; % SIFT peak threshold, default 0.
 MATCH_THRESH = 1.5; % SIFT matching threshold, default 1.5
 RANSAC_ITERATIONS = 100;
 SAMPSON_THRESHOLD = 25; % Default 50
+NUM_FRAMES = 3; % Chained points must be in >= NUM_FRAMES
 
 % Load images
 % imgs = load_images('model_castle');
@@ -61,8 +62,7 @@ load('ransac')
 % end
 
 % 3) Create point-view matrix for point correspondences
-% First, we because we got pairwise features and matches using vl_feat
-% in the previous steps, we need to construct a set array of all the matches
-% with no repeated features, to get the PV matrix.
-[all_descs, all_coords, all_matches] = combine_pairwise_matches(frames, descs, best_forward_matches, best_backward_matches);
-% PV = chainimages(all_matches);
+PV = chainimages(best_forward_matches, best_backward_matches);
+
+% 4) Create measurement matrix from PV matrix
+merged_cloud = reconstruction(PV, frames, NUM_FRAMES, imgs);

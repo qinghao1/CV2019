@@ -15,35 +15,44 @@
 % Outputs:
 % - PV: matrix containing matches between consecutive frames
 
-function [PV] = chainimages(matches)
+function [PV] = chainimages(forward_matches, backward_matches)
     tic;
     % number of views
-    frames = size(matches,2);
+    frames = length(forward_matches);
 
     % Initialize PV
     % We add an extra row to process the match between frame_last and frame_1.
     % This extra row will be deleted at the end.
-    %PV = zeros(frames+1,0);
-    newmatches = matches{1};
-    PV = zeros(frames+1, size(newmatches, 2));
-    PV(1:2, :) = newmatches;
+    PV = zeros(frames+1, length(forward_matches{1}));
 
     %  Starting from the first frame
-    for i = 2:frames
-        newmatches = matches{i};
+    for i=1:frames
+        j = i+1;
+        if j > length(forward_matches)
+            j = 1;
+        end
+        i_forward_matches = forward_matches{i};
+        i_backward_matches = backward_matches{j};
 
-        % Find already found points using intersection on PV(i,:) and newmatches
-        [~, IA, IB]  = intersect(newmatches(1, :), PV(i, :));
-        PV(i+1, IB) = newmatches(2, IA);
+        % For the first pair, simply add the indices of matched points to the same
+        % column of the first two rows of the point-view matrix.
+        if i==1
+            PV(1,:) = i_forward_matches;
+            PV(2,:) = i_backward_matches;
+        else
+            % Find already found points using intersection on PV(i,:) and newmatches
+            [~, IA, IB]  = intersect(PV(i,:), i_forward_matches);
+            PV(i+1, IA) = i_backward_matches(IB);
 
-        % Find new matching points that are not in the previous match set using setdiff.
-        [diff, IA] = setdiff(newmatches(1, :), PV(i, :));
+            % Find new matching points that are not in the previous match set using setdiff.
+            [diff, IA] = setdiff(i_forward_matches, PV(i,:));
 
-        % Grow the size of the point view matrix each time you find a new match.
-        start = size(PV,2)+1;
-        PV    = [PV zeros(frames+1, size(diff, 2))];
-        PV(i, start:end)   = diff;
-        PV(i+1, start:end) = newmatches(2, IA);
+            % Grow the size of the point view matrix each time you find a new match.
+            start = size(PV,2)+1;
+            PV    = [PV zeros(frames+1, size(diff,2))];
+            PV(i, start:end)   = diff;
+            PV(i+1, start:end) = i_backward_matches(IA);
+        end
     end
 
     % Process the last frame-pair. This part is already completed by TAs.
