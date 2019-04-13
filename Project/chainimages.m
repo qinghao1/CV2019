@@ -15,31 +15,35 @@
 % Outputs:
 % - PV: matrix containing matches between consecutive frames
 
-function [PV] = chainimages(frames, descs, forward_matches)
+function [PV] = chainimages(matches)
+    tic;
+    % number of views
+    frames = size(matches,2);
+
     % Initialize PV
     % We add an extra row to process the match between frame_last and frame_1.
     % This extra row will be deleted at the end.
-    PV = zeros(length(frames)+1,0);
+    %PV = zeros(frames+1,0);
+    newmatches = matches{1};
+    PV = zeros(frames+1, size(newmatches, 2));
+    PV(1:2, :) = newmatches;
 
-    % For the first pair, simply add the indices of matched points to the same
-    % column of the first two rows of the point-view matrix.
-    PV(1,:) = forward_matches{1};
-    PV(2,:) = forward_matches{2};
-    for i=3:frames
-        newmatches = forward_matches{i};
+    %  Starting from the first frame
+    for i = 2:frames
+        newmatches = matches{i};
 
         % Find already found points using intersection on PV(i,:) and newmatches
-        [~, IA, IB]  = intersect(newmatches(1,:), PV(i-1,:));
-        PV(i+1, IB) = intersection(...  , ...  )
+        [~, IA, IB]  = intersect(newmatches(1, :), PV(i, :));
+        PV(i+1, IB) = newmatches(2, IA);
 
         % Find new matching points that are not in the previous match set using setdiff.
-        [diff, IA] = setdiff(...  ,...  )
+        [diff, IA] = setdiff(newmatches(1, :), PV(i, :));
 
         % Grow the size of the point view matrix each time you find a new match.
         start = size(PV,2)+1;
-        PV    = [PV zeros(frames+1, size(diff,2))];
-        PV(i, start:end)   = ...
-        PV(i+1, start:end) = ...
+        PV    = [PV zeros(frames+1, size(diff, 2))];
+        PV(i, start:end)   = diff;
+        PV(i+1, start:end) = newmatches(2, IA);
     end
 
     % Process the last frame-pair. This part is already completed by TAs.
@@ -66,4 +70,5 @@ function [PV] = chainimages(frames, descs, forward_matches)
     PV                       = PV(1:frames,:);
 
     disp(strcat(int2str(size(PV,2)), ' points in pointview matrix so far'));
+    toc;
 end

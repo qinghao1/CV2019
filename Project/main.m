@@ -21,23 +21,48 @@ load('imgs')
 % [frames, descs] = sift_feat(imgs, PEAK_THRESH);
 % save('sift_feat', 'frames', 'descs')
 load('sift_feat')
-[forward_matches, backward_matches] = sift_match(descs, MATCH_THRESH);
-save('sift_match', 'forward_matches', 'backward_matches')
+% [forward_matches, backward_matches] = sift_match(descs, MATCH_THRESH);
+% save('sift_match', 'forward_matches', 'backward_matches')
 load('sift_match')
 
 % Plotting
-% figure; imshow([imgs{i}, imgs{j}], []);
-% hold on;
-% scatter(frames{i}(1,:), frames{i}(2,:), frames{i}(3,:), [1,1,0]);
-% scatter(size(imgs{i},2)+frames{j}(1,:), frames{j}(2,:), frames{j}(3,:), [1,1,0]);
-% match1 = frames{i}(:,matches(1,:));
-% match2 = frames{j}(:,matches(2,:));
-% line([match1(1,:);size(imgs{i},2)+match2(1,:)],[match1(2,:);match2(2,:)]);
+% for i = 1:length(imgs)
+% 	j = i + 1;
+% 	if j > length(imgs)
+% 		j = 1;
+% 	end
+% 	figure; imshow([imgs{i}, imgs{j}], []);
+% 	hold on;
+% 	scatter(frames{i}(1,:), frames{i}(2,:), frames{i}(3,:), [1,1,0]);
+% 	scatter(size(imgs{i},2)+frames{j}(1,:), frames{j}(2,:), frames{j}(3,:), [1,1,0]);
+% 	match1 = frames{i}(:,matches(1,:));
+% 	match2 = frames{j}(:,matches(2,:));
+% 	line([match1(1,:);size(imgs{i},2)+match2(1,:)],[match1(2,:);match2(2,:)]);
+% end
 
 % 2) Apply normalized 8-point RANSAC to find best matches
-[best_forward_matches, best_backward_matches] = ransac(frames, descs, forward_matches, backward_matches, RANSAC_ITERATIONS, SAMPSON_THRESHOLD);
-save('ransac', 'best_forward_matches', 'best_backward_matches')
+% [best_forward_matches, best_backward_matches] = ransac(frames, descs, forward_matches, backward_matches, RANSAC_ITERATIONS, SAMPSON_THRESHOLD);
+% save('ransac', 'best_forward_matches', 'best_backward_matches')
 load('ransac')
 
+% Plotting
+% for i = 1:length(imgs)
+% 	j = i + 1;
+% 	if j > length(imgs)
+% 		j = 1;
+% 	end
+% 	figure; imshow([imgs{i}, imgs{j}], []);
+% 	hold on;
+% 	scatter(frames{i}(1,best_forward_matches{i}), frames{i}(2, best_forward_matches{i}), frames{i}(3,best_forward_matches{i}), [1,1,0]);
+% 	scatter(size(imgs{i},2)+frames{j}(1,best_backward_matches{j}), frames{j}(2,best_backward_matches{j}), frames{j}(3,best_backward_matches{j}), [1,1,0]);
+% 	match1 = frames{i}(:,best_forward_matches{i});
+% 	match2 = frames{j}(:,best_backward_matches{j});
+% 	line([match1(1,:);size(imgs{i},2)+match2(1,:)],[match1(2,:);match2(2,:)]);
+% end
+
 % 3) Create point-view matrix for point correspondences
-% PV = chainimages(best_forward_matches);
+% First, we because we got pairwise features and matches using vl_feat
+% in the previous steps, we need to construct a set array of all the matches
+% with no repeated features, to get the PV matrix.
+[all_descs, all_coords, all_matches] = combine_pairwise_matches(frames, descs, best_forward_matches, best_backward_matches);
+% PV = chainimages(all_matches);

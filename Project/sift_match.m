@@ -7,7 +7,6 @@ function [forward_matches, backward_matches] = sift_match(descs, MATCH_THRESH)
 			j = 1;
 		end
 		matches = vl_ubcmatch(descs{i}, descs{j}, MATCH_THRESH);
-		disp(matches(1,:))
 		% Take indices
 		forward_matches{i} = matches(1,:);
 		backward_matches{j} = matches(2,:);
