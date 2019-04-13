@@ -7,14 +7,14 @@ clc; clear;
 run('../vlfeat-0.9.21/toolbox/vl_setup')
 
 % Constants
-PEAK_THRESH = 3; % SIFT peak threshold, default 0.
+PEAK_THRESH = 7; % SIFT peak threshold, default 0.
 MATCH_THRESH = 1.5; % SIFT matching threshold, default 1.5
-RANSAC_ITERATIONS = 100;
-SAMPSON_THRESHOLD = 25; % Default 50
+RANSAC_ITERATIONS = 200;
+SAMPSON_THRESHOLD = 20; % Default 50
 NUM_FRAMES = 3; % Chained points must be in >= NUM_FRAMES
 
 % Load images
-% imgs = load_images('model_castle');
+% imgs = load_images('TeddyBearPNG', 'PNG');
 % save('imgs', 'imgs')
 load('imgs')
 

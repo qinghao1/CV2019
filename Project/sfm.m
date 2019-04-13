@@ -15,7 +15,6 @@
 function [M,S,p] = sfm(X)
     close all
 
-    [~, noPoints] = size(X);
     % Centering: subtract the centroid of the image points (removes translation)
     X = X - mean(X, 2);
 
@@ -55,5 +54,6 @@ function [M,S,p] = sfm(X)
     end
 
     % Plot the obtained 3D coordinates:
+    figure(1);
     plot3(S(1,:),S(2,:),S(3,:),'.b');
 end

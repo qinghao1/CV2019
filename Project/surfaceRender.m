@@ -76,7 +76,7 @@ function [] = surfaceRender(pointcloud, M, Mean, img)
     q_x(isnan(q_y))=1;
     q_y(isnan(q_y))=1;
 
-    figure(2);
+    figure(3);
 
     if(size(img,3)==3)
         % Select the corresponding r,g,b image channels

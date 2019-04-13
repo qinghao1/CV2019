@@ -7,7 +7,7 @@
 % OUTPUT
 %   - diff: a matrix (n x 4) containing the residuals for the n cameras
 
-function diff = residuals(L, M)
+function diff = residuals(L)
 load('M');
 % Pre-allocate the residuals matrix
 diff = zeros(size(M,1)/2,4);

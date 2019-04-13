@@ -55,6 +55,8 @@ function [mergedCloud] = reconstruction(PV, frames, numFrames, img)
             % Compose Clouds in the form of (M,S,colInds)
             Clouds(i, :) = {M, S, colInds};
             i = i + 1;
+        else
+            fprintf('Cholesky failed for block %d\n', iBegin);
         end
     end
 
@@ -64,7 +66,7 @@ function [mergedCloud] = reconstruction(PV, frames, numFrames, img)
     % Initialize the merged (aligned) cloud with the main view, in the first point set.
     mergedCloud                 = zeros(3, size(PV,2));
     mergedCloud(:, Clouds{1,3}) = Clouds{1, 2};
-    mergedInds                  = Clouds{1,3};
+    mergedInds                  = Clouds{1, 3};
 
     % Stitch each 3D point set to the main view using procrustes
     numClouds = size(Clouds,1);
@@ -76,6 +78,7 @@ function [mergedCloud] = reconstruction(PV, frames, numFrames, img)
 
         % A certain number of shared points to do procrustes analysis.
         if size(sharedPoints, 2) < 15
+            fprintf('Shared points too low: %d for cloud %d\n', size(sharedPoints, 2), i);
             continue
         end
 
@@ -83,10 +86,10 @@ function [mergedCloud] = reconstruction(PV, frames, numFrames, img)
         [d, Z, T] = procrustes(mergedCloud(:,sharedInds)', sharedPoints');
 
         % Find the points that are not shared between the merged cloud and the Clouds{i,:} using "setdiff" over indexes
-        [iNew, iCloudsNew] = setdiff(Clouds{1,3}, mergedInds);
+        [iNew, iCloudsNew] = setdiff(Clouds{i,3}, mergedInds);
 
         % T.c is a repeated 3D offset, so resample it to have the correct size
-        c = T.c(ones(size(iCloudsNew,1),1),:);
+        c = T.c(ones(size(iCloudsNew,2),1),:);
 
         % Transform the new points using: Z = (T.b * Y' * T.T + c)'.
     % Note: We transposed the inputs to "procrustes" so we also have to transpose the input/output to the transformation.
@@ -97,13 +100,14 @@ function [mergedCloud] = reconstruction(PV, frames, numFrames, img)
 
     % Plot the full merged cloud
     % Helpful for debugging and visualizing your reconstruction
-    % X = mergedCloud(1,:)';
-    % Y = mergedCloud(2,:)';
-    % Z = mergedCloud(3,:)';
-    % scatter3(X, Y, Z, 20, [1 0 0], 'filled');
-    % axis( [-500 500 -500 500 -500 500] )
-    % daspect([1 1 1])
-    % rotate3d
+    figure(2);
+    X = mergedCloud(1,:)';
+    Y = mergedCloud(2,:)';
+    Z = mergedCloud(3,:)';
+    scatter3(X, Y, Z, 20, [1 0 0], 'filled');
+    axis( [-500 500 -500 500 -500 500] )
+    daspect([1 1 1])
+    rotate3d
 
 
     % You are free to use other techniques like (Bundle Adjustment) to further

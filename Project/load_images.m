@@ -1,5 +1,5 @@
-function imgs = load_images(directory)
-	files = dir(fullfile(directory, '*.JPG'));
+function imgs = load_images(directory, format)
+	files = dir(fullfile(directory, strcat('*.', format)));
 	imgs = {};
 	for i = 1 : length(files)
 		baseFilename = files(i).name;
